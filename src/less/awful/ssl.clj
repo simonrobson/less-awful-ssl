@@ -49,6 +49,12 @@
   stored in memory."
   (char-array "GheesBetDyPhuvwotNolofamLydMues9"))
 
+(defn load-certificates
+  "Loads all certificates from a file."
+  [file]
+  (with-open [stream (input-stream file)]
+    (.generateCertificates x509-cert-factory stream)))
+
 (defn ^Certificate load-certificate
   "Loads an X.509 certificate from a file."
   [file]
@@ -93,9 +99,10 @@
   "Makes a trust store, suitable for backing a TrustManager, out of a CA cert
   file."
   [ca-cert-file]
-  (doto (KeyStore/getInstance "JKS")
-    (.load nil nil)
-    (.setCertificateEntry "cacert" (load-certificate ca-cert-file))))
+  (let [store (doto (KeyStore/getInstance "JKS") (.load nil nil))]
+    (doseq [[cert idx] (zipmap (load-certificates ca-cert-file) (iterate inc 0))]
+      (.setCertificateEntry store (str "cacert" idx) cert))
+    store))
 
 (defn trust-manager
   "An X.509 trust manager for a KeyStore."

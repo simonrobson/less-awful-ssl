@@ -100,7 +100,7 @@
   file."
   [ca-cert-file]
   (let [store (doto (KeyStore/getInstance "JKS") (.load nil nil))]
-    (doseq [[cert idx] (zipmap (load-certificates ca-cert-file) (iterate inc 0))]
+    (doseq [[cert idx] (zipmap (load-certificates ca-cert-file) (range))]
       (.setCertificateEntry store (str "cacert" idx) cert))
     store))
 
